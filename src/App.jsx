@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import NoteEditor from "./NoteEditor";
-import SaveToDevice from "./SaveToDevice";
 import NotePage from "./NotePage";
 import { Container } from "@material-ui/core";
 import useNoteContext from "./useNoteContext";
