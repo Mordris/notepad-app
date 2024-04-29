@@ -1,56 +1,83 @@
 // App.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import NoteEditor from "./NoteEditor";
-import Search from "./Search";
 import SaveToDevice from "./SaveToDevice";
-import NotePage from "./NotePage"; // Import NotePage component
+import NotePage from "./NotePage";
 import { Container } from "@material-ui/core";
 import useNoteContext from "./useNoteContext";
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Sidebar closed by default
-  const { notes } = useNoteContext();
-  const [selectedNote, setSelectedNote] = useState(null); // State to manage selected note
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { notes, updateNote } = useNoteContext();
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [filteredNotes, setFilteredNotes] = useState([]);
+
+  useEffect(() => {
+    if (selectedNote) {
+      const updatedNote = notes.find((note) => note.id === selectedNote.id);
+      setSelectedNote(updatedNote);
+    }
+  }, [notes, selectedNote]);
 
   const handleSidebarToggle = () => {
-    setSidebarOpen(!sidebarOpen); // Toggle sidebar state
+    setSidebarOpen(!sidebarOpen);
   };
 
   const handleSidebarClose = () => {
-    setSidebarOpen(false); // Close sidebar when clicked away
+    setSidebarOpen(false);
   };
 
   const handleNoteClick = (note) => {
-    setSelectedNote(note); // Set the selected note
+    setSelectedNote(note);
   };
 
   const handleCloseNotePage = () => {
-    setSelectedNote(null); // Close the note page
+    setSelectedNote(null);
+  };
+
+  const handleSearch = (query) => {
+    const filteredNotes = notes.filter(
+      (note) =>
+        note.header.toLowerCase().includes(query.toLowerCase()) ||
+        note.content.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredNotes(filteredNotes);
+  };
+
+  const handleSave = () => {
+    // Pass notes to SaveToDevice component for saving
   };
 
   return (
     <div className="app">
-      <Header toggleSidebar={handleSidebarToggle} />
-
+      <Header
+        toggleSidebar={handleSidebarToggle}
+        onSearch={handleSearch}
+        onSave={handleSave} // Pass onSave handler to Header component
+      />
       <Container className="app__body">
         <div className="app__container" onClick={handleSidebarClose}>
           <Sidebar
             isOpen={sidebarOpen}
-            notes={notes}
+            notes={filteredNotes.length > 0 ? filteredNotes : notes} // Use filteredNotes if it's not empty, otherwise use all notes
             onNoteClick={handleNoteClick}
           />
-          {selectedNote ? ( // Render NotePage if a note is selected
-            <NotePage note={selectedNote} onClose={handleCloseNotePage} />
+
+          {selectedNote ? (
+            <NotePage
+              notes={notes}
+              note={selectedNote}
+              onClose={handleCloseNotePage}
+              updateNote={updateNote} // Pass updateNote function to NotePage
+            />
           ) : (
-            // Otherwise, render NoteEditor
             <NoteEditor />
           )}
         </div>
       </Container>
-      <Search />
-      <SaveToDevice />
+      {/* Pass notes to SaveToDevice component */}
     </div>
   );
 }

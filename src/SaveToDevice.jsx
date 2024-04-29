@@ -1,18 +1,31 @@
-import React from 'react';
-import { Button } from '@material-ui/core';
+// SaveToDevice.jsx
+import React from "react";
+import { Button } from "@material-ui/core";
 
-function SaveToDevice() {
+const SaveToDevice = ({ notes, filename }) => {
+  const formatNotes = () => {
+    return notes
+      .map((note) => `${note.header}\n\n${note.content}`)
+      .join("\n\n\n");
+  };
+
   const handleSave = () => {
-    // Functionality to save notes to device as a txt file
+    const text = formatNotes(); // Format notes as desired
+    const blob = new Blob([text], { type: "text/plain" });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = `${filename}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
-    <div className="save-to-device">
-      <Button variant="contained" color="primary" onClick={handleSave}>
-        Save to Device
-      </Button>
-    </div>
+    <Button variant="outlined" color="primary" onClick={handleSave}>
+      Save to Device
+    </Button>
   );
-}
+};
 
 export default SaveToDevice;

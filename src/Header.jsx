@@ -1,5 +1,5 @@
 // Header.jsx
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -10,7 +10,18 @@ import {
 import MenuIcon from "@material-ui/icons/Menu";
 import SearchIcon from "@material-ui/icons/Search";
 
-function Header({ toggleSidebar }) {
+function Header({ toggleSidebar, onSearch }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchInputChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+  };
+
+  const handleSearch = () => {
+    onSearch(searchQuery);
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -30,7 +41,17 @@ function Header({ toggleSidebar }) {
           <InputBase
             placeholder="Search notes..."
             inputProps={{ "aria-label": "search notes" }}
+            value={searchQuery}
+            onChange={handleSearchInputChange}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                handleSearch();
+              }
+            }}
           />
+          <IconButton onClick={handleSearch}>
+            <SearchIcon />
+          </IconButton>
         </div>
       </Toolbar>
     </AppBar>

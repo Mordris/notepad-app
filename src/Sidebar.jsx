@@ -1,5 +1,5 @@
 // Sidebar.jsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Drawer,
   List,
@@ -7,11 +7,31 @@ import {
   ListItemText,
   Typography,
   IconButton,
+  TextField,
+  ListItemIcon,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import StarIcon from "@material-ui/icons/Star";
+import StarBorderIcon from "@material-ui/icons/StarBorder";
 import moment from "moment"; // Import moment library for date formatting
 
 function Sidebar({ isOpen, onClose, notes, onNoteClick }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchInputChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearchInputClick = (e) => {
+    e.stopPropagation(); // Prevent the click event from bubbling up
+  };
+
+  const filteredNotes = searchQuery
+    ? notes.filter((note) =>
+        note.header.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : notes;
+
   const handleNoteClick = (note) => {
     onNoteClick(note); // Pass the selected note to the parent component
   };
@@ -34,8 +54,17 @@ function Sidebar({ isOpen, onClose, notes, onNoteClick }) {
             <CloseIcon />
           </IconButton>
         </div>
+        <TextField
+          label="Search notes..."
+          variant="outlined"
+          fullWidth
+          value={searchQuery}
+          onChange={handleSearchInputChange}
+          onClick={handleSearchInputClick} // Prevent the click event from bubbling up
+          style={{ marginBottom: "8px" }}
+        />
         <List>
-          {notes.map((note) => (
+          {filteredNotes.map((note) => (
             <ListItem
               key={note.id}
               button
@@ -47,6 +76,13 @@ function Sidebar({ isOpen, onClose, notes, onNoteClick }) {
                   "MMM DD, YYYY hh:mm A"
                 )}`} // Format last updated date
               />
+              <ListItemIcon>
+                {note.starred ? (
+                  <StarIcon style={{ color: "orange" }} />
+                ) : (
+                  <StarBorderIcon />
+                )}
+              </ListItemIcon>
             </ListItem>
           ))}
         </List>
