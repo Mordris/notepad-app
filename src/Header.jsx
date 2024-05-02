@@ -1,9 +1,20 @@
 // Header.jsx
 import React from "react";
-import { AppBar, Toolbar, Typography, IconButton } from "@material-ui/core";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Button,
+} from "@material-ui/core";
 import MenuIcon from "@material-ui/icons/Menu";
 
 function Header({ toggleSidebar }) {
+  
+  const handleNewNote = () => {
+    window.location.reload();
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -18,6 +29,9 @@ function Header({ toggleSidebar }) {
         <Typography variant="h6" style={{ flexGrow: 1 }}>
           Notes App
         </Typography>
+        <Button onClick={handleNewNote} variant="contained">
+          New Note
+        </Button>
       </Toolbar>
     </AppBar>
   );

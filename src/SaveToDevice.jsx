@@ -1,17 +1,9 @@
-// SaveToDevice.jsx
 import React from "react";
 import { Button } from "@material-ui/core";
 
-const SaveToDevice = ({ notes, filename }) => {
-  const formatNotes = () => {
-    return notes
-      .map((note) => `${note.header}\n\n${note.content}`)
-      .join("\n\n\n");
-  };
-
+const SaveToDevice = ({ content, filename }) => {
   const handleSave = () => {
-    const text = formatNotes(); // Format notes as desired
-    const blob = new Blob([text], { type: "text/plain" });
+    const blob = new Blob([content], { type: "text/plain" });
     const href = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = href;

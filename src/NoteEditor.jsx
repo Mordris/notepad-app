@@ -1,4 +1,3 @@
-// NoteEditor.jsx
 import React, { useState } from "react";
 import {
   Typography,
@@ -33,20 +32,26 @@ const NoteEditor = () => {
   };
 
   const handleUpload = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const content = event.target.result;
-      setUploadedContent(content);
-    };
-    reader.readAsText(file);
+    const files = e.target.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result.trim(); // Trim content before appending
+        setUploadedContent(content); // Store uploaded content
+        setNote((prevNote) => ({
+          ...prevNote,
+          content: prevNote.content + "\n" + content, // Always add a new line before appending content
+        }));
+      };
+      reader.readAsText(file);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const newNote = {
       ...note,
-      content: uploadedContent || note.content,
       id: Math.floor(Date.now() / 1000),
     };
     if (newNote.id) {
@@ -77,7 +82,7 @@ const NoteEditor = () => {
         <TextField
           label="Note Content"
           name="content"
-          value={uploadedContent || note.content}
+          value={note.content}
           onChange={handleChange}
           variant="outlined"
           fullWidth
@@ -101,7 +106,7 @@ const NoteEditor = () => {
                     color="default"
                     component="span"
                     startIcon={<CloudUploadIcon />}
-                    className={classes.uploadButton} // Add class for positioning
+                    className={classes.uploadButton}
                   >
                     Upload
                   </Button>

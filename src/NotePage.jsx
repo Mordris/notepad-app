@@ -7,11 +7,14 @@ import {
   TextField,
   Button,
   ListItemIcon,
+  InputAdornment,
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import StarIcon from "@material-ui/icons/Star";
 import StarBorderIcon from "@material-ui/icons/StarBorder";
+import CloudUploadIcon from "@material-ui/icons/CloudUpload"; // Import CloudUploadIcon
+import ArrowBackIcon from "@material-ui/icons/ArrowBack"; // Import ArrowBackIcon
 import useNoteContext from "./useNoteContext";
 import SaveToDevice from "./SaveToDevice";
 
@@ -24,16 +27,26 @@ const useStyles = makeStyles((theme) => ({
   orangeStar: {
     color: "orange",
   },
+  uploadButton: {
+    position: "absolute",
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+  backButton: {
+    color: "red",
+    marginRight: theme.spacing(2), // Adjust margin as needed
+  },
 }));
 
-const NotePage = ({ notes, note, onClose }) => {
+const NotePage = ({ note, onClose, updateNote }) => {
   const classes = useStyles();
-  const { updateNote, deleteNote } = useNoteContext();
+  const { deleteNote } = useNoteContext();
   const [editing, setEditing] = useState(false);
   const [editedNote, setEditedNote] = useState({
     header: note.header,
     content: note.content,
   });
+  const [lastUploadedFile, setLastUploadedFile] = useState(null);
 
   const handleEditToggle = () => {
     setEditing(!editing);
@@ -56,6 +69,14 @@ const NotePage = ({ notes, note, onClose }) => {
     setEditing(false);
   };
 
+  const handleCancel = () => {
+    setEditedNote({
+      header: note.header,
+      content: note.content,
+    });
+    setEditing(false);
+  };
+
   const handleDelete = () => {
     deleteNote(note.id);
     onClose();
@@ -64,6 +85,22 @@ const NotePage = ({ notes, note, onClose }) => {
   const handleStarToggle = () => {
     const updatedNote = { ...note, starred: !note.starred };
     updateNote(updatedNote);
+  };
+
+  const handleUpload = (e) => {
+    const files = e.target.files;
+    if (files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target.result.trim(); // Trim content before appending
+        setEditedNote((prevNote) => ({
+          ...prevNote,
+          content: prevNote.content + "\n\n" + content, // Always add a new line before appending content
+        }));
+      };
+      reader.readAsText(file);
+    }
   };
 
   return (
@@ -91,9 +128,36 @@ const NotePage = ({ notes, note, onClose }) => {
             multiline
             minRows={10}
             required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <input
+                    accept=".txt"
+                    id="contained-button-file"
+                    type="file"
+                    style={{ display: "none" }}
+                    onChange={handleUpload}
+                  />
+                  <label htmlFor="contained-button-file">
+                    <Button
+                      variant="contained"
+                      color="default"
+                      component="span"
+                      startIcon={<CloudUploadIcon />}
+                      className={classes.uploadButton} // Add class for positioning
+                    >
+                      Upload
+                    </Button>
+                  </label>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button onClick={handleSubmit} color="primary">
             Save
+          </Button>
+          <Button onClick={handleCancel} className={classes.backButton}>
+            Cancel
           </Button>
         </div>
       ) : (
@@ -142,7 +206,7 @@ const NotePage = ({ notes, note, onClose }) => {
               <StarBorderIcon />
             )}
           </IconButton>
-          <SaveToDevice notes={notes} filename={note.header} />{" "}
+          <SaveToDevice content={note.content} filename={note.header} />{" "}
         </div>
       )}
     </div>
